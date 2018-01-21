@@ -2,7 +2,7 @@
 const _ = require('lodash');
 const AWS = require('aws-sdk');
 const eachOf = require('async/eachOf');
-const algoliaHelper = require('./algoli-helper');
+const algoliaHelper = require('./algolia-helper');
 const kinesisClient  = new AWS.Kinesis({
   'region':'us-east-1',
 
@@ -56,7 +56,7 @@ module.exports.pushToAlgolia = (event, context, callback) => {
   console.log(event);
   const list = event.Records;
 
-  const iterate = (record, cb)=>{
+  const iterate = (record, key,cb)=>{
     let retrievedRecord = new Buffer(record.kinesis.data,'base64').toString();
     let universityInfo = JSON.parse(retrievedRecord);
 
@@ -64,9 +64,11 @@ module.exports.pushToAlgolia = (event, context, callback) => {
 
     algoliaHelper.addToAlgolia(universityInfo)
     .then(()=>{
+      console.log('done writing to algolia');
       cb();
     })
     .catch((err)=>{
+      console.log('error rwriting to algolia');
       cb(err);
     })
   }
