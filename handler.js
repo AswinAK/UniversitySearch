@@ -14,6 +14,27 @@ const attachPartitionKey = record =>{
 
   }
 }
+
+const generateId = (record)=>{
+  console.log('generating id for '+JSON.stringify(record));
+  let newName = record.name.replace('/ /g','');
+  let id = `W${record.address.zip}-${newName}-${record.course.level}`
+  return id;
+}
+
+const prepareRecoerd = (record)=>{
+  record.objectID = generateId(record);
+  record.menu = {}
+
+  if(record.course.level =='graduate'){
+    record.menu['graduate'] = record.course.name;
+  }else if(record.course.level =='undergraduate'){
+    record.menu['undergraduate'] = record.course.name;
+  }
+  return record;
+}
+
+
 module.exports.pushToKinesis = (event, context, callback) => {
   const universityList = require('./sample-data.json');
 
@@ -25,12 +46,12 @@ module.exports.pushToKinesis = (event, context, callback) => {
     _.forEach(university.courses, course =>{
       let record = JSON.parse(JSON.stringify(metaInfor))
       record.course = course;
-      records.push(record);
+      records.push(prepareRecoerd(record));
     });
 
   });
 
-  console.log(records);
+  console.log('!!!>>>'+records);
 
   const recordsToTransmit = _.map(records, attachPartitionKey);
 
@@ -78,4 +99,30 @@ module.exports.pushToAlgolia = (event, context, callback) => {
       callback(err);
     callback(null, 'No of records pushed: '+list.length);
   });
+}
+
+//menu?category=undergraduate
+module.exports.getMenu = (event, context, callback) => {
+  console.log(event);
+  const category = event.queryStringParameters.category;
+
+  if(!category){
+    const errorResponse = {
+      statusCode: 200,
+      body: 'pls specify a category!'
+    };
+    callback(null, errorResponse);
+  }else{
+
+    algoliaHelper.getMenu(category)
+    .then(menuResults =>{
+      const response = {
+        statusCode: 200,
+        body: JSON.stringify(menuResults)
+      };
+      callback(null, response);s
+    }) 
+
+    
+  }
 }

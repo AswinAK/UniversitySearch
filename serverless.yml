@@ -37,6 +37,16 @@ functions:
          batchSize: 100
          startionPosition: LATEST
          enabled: true
+  
+  getMenu:
+    handler: handler.getMenu
+    events:
+      - http:
+         cors: true
+         path: menu
+         method: get
+         private: false
+        
 
 #    The following are a few example events you can configure
 #    NOTE: Please make sure to change your handler code to work with those events
