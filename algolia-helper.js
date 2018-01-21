@@ -10,7 +10,9 @@ algoliaIndex.setSettings({
 
     attributesForFaceting: [
         'menu.graduate',
-        'menu.undergraduate'
+        'menu.undergraduate',
+        'filterOnly(course.level)',
+        'filterOnly(course.name)'
     ]
 });
 
@@ -38,4 +40,19 @@ exports.getById = (id)=>{
         console.log('SEARCH RES: '+content);
         return content.hits[0];
     })
+}
+
+exports.searchByFilters = (queryParams)=>{
+    const name = queryParams.name;
+    const level = queryParams.level;
+
+    let filter = `course.name: '${name}' AND course.level: '${level}'`
+
+    return algoliaIndex.search({
+        hitsPerPage: 100,
+        filters: filter
+    }).then((res=>{
+        console.log('RESULTS: '+JSON.stringify(res));
+        return res.hits;
+    }))
 }

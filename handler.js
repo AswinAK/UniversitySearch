@@ -122,7 +122,54 @@ module.exports.getMenu = (event, context, callback) => {
       };
       callback(null, response);s
     }) 
-
-    
   }
+}
+
+
+module.exports.getUniversityById = (event, context, callback) => {
+  console.log(event);
+  const oid = event.pathParameters.id;
+  
+    if(!oid){
+      const errorResponse = {
+        statusCode: 200,
+        body: 'pls specify university ID!'
+      };
+      callback(null, errorResponse);
+    }else{
+  
+      algoliaHelper.getById(oid)
+      .then(uniResults =>{
+        const response = {
+          statusCode: 200,
+          body: JSON.stringify(uniResults)
+        };
+        callback(null, response);
+      }) 
+    }
+}
+
+module.exports.search = (event, context, callback) => {
+  console.log(event);
+  const queryParams = event.queryStringParameters;
+  if(queryParams){
+    algoliaHelper.searchByFilters(queryParams)
+    .then((res)=>{
+      const errorResponse = {
+        statusCode: 400,
+        body: JSON.stringify(res)
+      };
+      callback(null, errorResponse);
+  
+    })
+
+  }else{
+    const errorResponse = {
+      statusCode: 400,
+      body: 'pls specify university ID!'
+    };
+    callback(null, errorResponse);
+
+  }
+  
 }
